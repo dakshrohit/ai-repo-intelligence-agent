@@ -109,3 +109,13 @@ temp
 
 
 .turbo
+
+.env
+
+repositories/
+
+node_modules/
+
+.next/
+
+generated/

@@ -4,6 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url = env("DATABASE_URL")
 }
 
 model Repository {
@@ -11,6 +12,7 @@ model Repository {
   name          String
   githubUrl     String   @unique
   defaultBranch String?
+  localPath     String?
   status        String   @default("PENDING")
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
