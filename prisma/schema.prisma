@@ -1,0 +1,119 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Repository {
+  id            String   @id @default(cuid())
+  name          String
+  githubUrl     String   @unique
+  defaultBranch String?
+  status        String   @default("PENDING")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  chunks        RepositoryChunk[]
+  commits       Commit[]
+  pullRequests  PullRequest[]
+  decisions     DecisionRecord[]
+  ownerships    OwnershipRecord[]
+  indexingJobs  IndexingJob[]
+}
+
+model RepositoryChunk {
+  id           String   @id @default(cuid())
+  repositoryId String
+
+  filePath     String
+  chunkHash    String
+  chunkType    String
+
+  startLine    Int?
+  endLine      Int?
+
+  createdAt    DateTime @default(now())
+
+  repository   Repository @relation(fields: [repositoryId], references: [id])
+
+  @@index([repositoryId])
+}
+
+model Commit {
+  id           String   @id @default(cuid())
+  repositoryId String
+
+  sha          String
+  author       String
+  message      String
+
+  committedAt  DateTime
+
+  repository   Repository @relation(fields: [repositoryId], references: [id])
+
+  @@index([repositoryId])
+}
+
+model PullRequest {
+  id            String   @id @default(cuid())
+  repositoryId  String
+
+  prNumber      Int
+  title         String
+  description   String?
+
+  mergedAt      DateTime?
+
+  repository    Repository @relation(fields: [repositoryId], references: [id])
+
+  @@index([repositoryId])
+}
+
+model DecisionRecord {
+  id            String   @id @default(cuid())
+  repositoryId  String
+
+  title         String
+  reason        String
+
+  alternatives  String?
+
+  sourcePr      Int?
+  sourceCommit  String?
+
+  createdAt     DateTime @default(now())
+
+  repository    Repository @relation(fields: [repositoryId], references: [id])
+
+  @@index([repositoryId])
+}
+
+model OwnershipRecord {
+  id            String   @id @default(cuid())
+  repositoryId  String
+
+  filePath      String
+  owner         String
+
+  changeCount   Int @default(0)
+
+  repository    Repository @relation(fields: [repositoryId], references: [id])
+
+  @@index([repositoryId])
+}
+
+model IndexingJob {
+  id            String   @id @default(cuid())
+  repositoryId  String
+
+  status        String
+
+  startedAt     DateTime @default(now())
+  completedAt   DateTime?
+
+  repository    Repository @relation(fields: [repositoryId], references: [id])
+
+  @@index([repositoryId])
+}
