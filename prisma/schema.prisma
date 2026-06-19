@@ -4,132 +4,156 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url = env("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
 
 model Repository {
-  id            String   @id @default(cuid())
+  id            String      @id @default(cuid())
   name          String
-  githubUrl     String   @unique
+  githubUrl     String      @unique
+  chunkHashes   ChunkHash[]
   defaultBranch String?
   localPath     String?
-  status        String   @default("PENDING")
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  status        String      @default("PENDING")
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
-  chunks        RepositoryChunk[]
-  commits       Commit[]
-  pullRequests  PullRequest[]
-  decisions     DecisionRecord[]
-  ownerships    OwnershipRecord[]
-  indexingJobs  IndexingJob[]
+  chunks       RepositoryChunk[]
+  commits      Commit[]
+  pullRequests PullRequest[]
+  decisions    DecisionRecord[]
+  ownerships   OwnershipRecord[]
+  indexingJobs IndexingJob[]
 }
 
 model RepositoryChunk {
-  id           String   @id @default(cuid())
+  id           String @id @default(cuid())
   repositoryId String
 
-  filePath     String
-  chunkHash    String
-  chunkType    String
+  filePath  String
+  chunkHash String
+  chunkType String
 
-  startLine    Int?
-  endLine      Int?
+  startLine Int?
+  endLine   Int?
 
-  createdAt    DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  repository   Repository @relation(fields: [repositoryId], references: [id])
+  repository Repository @relation(fields: [repositoryId], references: [id])
 
   @@index([repositoryId])
 }
 
 model Commit {
-  id           String   @id @default(cuid())
+  id           String @id @default(cuid())
   repositoryId String
 
-  sha          String
-  author       String
-  message      String
+  sha     String
+  author  String
+  message String
 
-  committedAt  DateTime
+  committedAt DateTime
 
-  repository   Repository @relation(fields: [repositoryId], references: [id])
+  repository Repository @relation(fields: [repositoryId], references: [id])
 
   @@index([repositoryId])
 }
 
 model PullRequest {
-  id            String   @id @default(cuid())
-  repositoryId  String
+  id           String @id @default(cuid())
+  repositoryId String
 
-  prNumber      Int
-  title         String
-  description   String?
+  prNumber    Int
+  title       String
+  description String?
 
-  mergedAt      DateTime?
+  mergedAt DateTime?
 
-  repository    Repository @relation(fields: [repositoryId], references: [id])
+  repository Repository @relation(fields: [repositoryId], references: [id])
 
   @@index([repositoryId])
 }
 
 model DecisionRecord {
-  id            String   @id @default(cuid())
-  repositoryId  String
+  id           String @id @default(cuid())
+  repositoryId String
 
-  title         String
-  reason        String
+  title  String
+  reason String
 
-  alternatives  String?
+  alternatives String?
 
-  sourcePr      Int?
-  sourceCommit  String?
+  sourcePr     Int?
+  sourceCommit String?
 
-  createdAt     DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  repository    Repository @relation(fields: [repositoryId], references: [id])
+  repository Repository @relation(fields: [repositoryId], references: [id])
 
   @@index([repositoryId])
 }
 
 model OwnershipRecord {
-  id            String   @id @default(cuid())
-  repositoryId  String
+  id           String @id @default(cuid())
+  repositoryId String
 
-  filePath      String
-  owner         String
+  filePath String
+  owner    String
 
-  changeCount   Int @default(0)
+  changeCount Int @default(0)
 
-  repository    Repository @relation(fields: [repositoryId], references: [id])
+  repository Repository @relation(fields: [repositoryId], references: [id])
 
   @@index([repositoryId])
 }
 
 model IndexingJob {
-  id            String   @id @default(cuid())
-  repositoryId  String
+  id           String @id @default(cuid())
+  repositoryId String
 
-  status        String
+  status String
 
-  startedAt     DateTime @default(now())
-  completedAt   DateTime?
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
 
-  repository    Repository @relation(fields: [repositoryId], references: [id])
+  repository Repository @relation(fields: [repositoryId], references: [id])
 
   @@index([repositoryId])
 }
+
 model FileHash {
   id String @id @default(cuid())
 
   repositoryId String
 
   filePath String
-  hash String
+  hash     String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([repositoryId, filePath])
+  @@index([repositoryId])
+}
+
+model ChunkHash {
+  id String @id @default(cuid())
+
+  repositoryId String
+
+  filePath   String
+  chunkIndex Int
+
+  hash String
+
+  startLine Int
+  endLine   Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  repository Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+
+  @@unique([repositoryId, filePath, chunkIndex])
   @@index([repositoryId])
 }
