@@ -119,3 +119,17 @@ model IndexingJob {
 
   @@index([repositoryId])
 }
+model FileHash {
+  id String @id @default(cuid())
+
+  repositoryId String
+
+  filePath String
+  hash String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([repositoryId, filePath])
+  @@index([repositoryId])
+}
