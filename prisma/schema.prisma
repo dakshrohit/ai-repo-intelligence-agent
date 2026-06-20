@@ -12,6 +12,7 @@ model Repository {
   name          String
   githubUrl     String      @unique
   chunkHashes   ChunkHash[]
+  chunkEmbeddings ChunkEmbedding[]
   defaultBranch String?
   localPath     String?
   status        String      @default("PENDING")
@@ -156,4 +157,25 @@ model ChunkHash {
 
   @@unique([repositoryId, filePath, chunkIndex])
   @@index([repositoryId])
+}
+model ChunkEmbedding {
+  id String @id @default(cuid())
+
+  repositoryId String
+
+  filePath String
+
+  chunkIndex Int
+
+  chunkHash String
+
+  vectorId String
+
+  createdAt DateTime @default(now())
+
+  repository Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+
+  @@index([repositoryId])
+
+  @@unique([repositoryId, filePath, chunkIndex])
 }
