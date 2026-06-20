@@ -19,7 +19,14 @@ export async function GET() {
     "auth.ts",
     0,
     text,
-    vector
+    vector,
+    {
+      repositoryId: "demo-repo",
+      filePath: "auth.ts",
+      chunkIndex: 0,
+      content: text,
+      embedding: vector,
+    }
   );
 
   return NextResponse.json({
