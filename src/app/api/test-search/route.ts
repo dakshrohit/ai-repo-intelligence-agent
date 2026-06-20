@@ -3,6 +3,9 @@ import { NextResponse } from "next/server";
 import { embedText } from "@/lib/embeddings/embed";
 import { searchChunks } from "@/lib/qdrant/search";
 
+const REPOSITORY_ID =
+  "demo-repo";
+
 export async function GET() {
   const query =
     "How does authentication work?";
@@ -12,6 +15,7 @@ export async function GET() {
 
   const results =
     await searchChunks(
+      REPOSITORY_ID,
       embedding,
       5
     );

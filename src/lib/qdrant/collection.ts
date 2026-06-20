@@ -25,4 +25,11 @@ createCollection() {
       },
     }
   );
+  await qdrant.createPayloadIndex(
+  "repository_chunks",
+  {
+    field_name: "repositoryId",
+    field_schema: "keyword",
+  }
+);
 }
