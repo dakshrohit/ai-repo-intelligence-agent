@@ -20,9 +20,9 @@ createCollection() {
     "repository_chunks",
     {
       vectors: {
-        size: 3072,
-        distance: "Cosine",
-      },
+  size: 768,
+  distance: "Cosine"
+}
     }
   );
   await qdrant.createPayloadIndex(

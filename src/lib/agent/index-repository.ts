@@ -13,16 +13,20 @@ export async function indexRepository(
   repositoryId: string,
   repositoryPath: string
 ) {
-  const files = await discoverFiles(repositoryPath);
+  const files =
+    await discoverFiles(
+      repositoryPath
+    );
 
   let indexedChunks = 0;
 
   for (const file of files) {
     try {
-      const content = await fs.readFile(
-        file,
-        "utf8"
-      );
+      const content =
+        await fs.readFile(
+          file,
+          "utf8"
+        );
 
       const chunks =
         buildChunkHashes(
@@ -36,7 +40,9 @@ export async function indexRepository(
           chunks
         );
 
-      if (changedChunks.length === 0) {
+      if (
+        changedChunks.length === 0
+      ) {
         continue;
       }
 
@@ -46,19 +52,51 @@ export async function indexRepository(
         chunks
       );
 
-      for (const chunk of changedChunks) {
-        const embedding =
-          await embedText(
-            chunk.content
+      for (
+        const chunk of changedChunks
+      ) {
+        try {
+          const embedding =
+            await embedText(
+              chunk.content
+            );
+
+          if (
+            !embedding ||
+            embedding.length === 0
+          ) {
+            console.log(
+              "Skipping chunk: empty embedding"
+            );
+            continue;
+          }
+
+          console.log(
+            "Embedding length:",
+            embedding.length
           );
-await upsertChunk({
-  repositoryId,
-  filePath: file,
-  chunkIndex: chunk.chunkIndex,
-  content: chunk.content,
-  embedding,
-});
-        indexedChunks++;
+
+          await upsertChunk({
+            repositoryId,
+            filePath: file,
+            chunkIndex:
+              chunk.chunkIndex,
+            content:
+              chunk.content,
+            embedding,
+          });
+
+          indexedChunks++;
+        } catch (error) {
+          console.error(
+            "Embedding failed:",
+            file,
+            error,
+            chunk.chunkIndex
+          );
+
+          continue;
+        }
       }
     } catch (error) {
       console.error(

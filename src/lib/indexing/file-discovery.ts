@@ -12,7 +12,18 @@ const ALLOWED_EXTENSIONS = [
   ".rs",
   ".md",
 ];
-
+const SKIP_DIRS = [
+  "node_modules",
+  ".git",
+  ".next",
+  "dist",
+  "build",
+  "coverage",
+  "__tests__",
+  "__mocks__",
+  "test",
+  "tests",
+];
 const IGNORED_FOLDERS = [
   "node_modules",
   ".git",
@@ -20,7 +31,10 @@ const IGNORED_FOLDERS = [
   "dist",
   "build",
   "coverage",
+  "target",
+  ".turbo",
 ];
+
 
 export async function discoverFiles(
   rootPath: string
@@ -36,6 +50,14 @@ export async function discoverFiles(
     for (const entry of entries) {
       const fullPath =
         path.join(dir, entry.name);
+        if (
+  SKIP_DIRS.some((dir) =>
+    fullPath.includes(dir)
+  )
+) {
+  continue;
+}
+        
 
       if (
         entry.isDirectory()
